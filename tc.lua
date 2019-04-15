@@ -1,7 +1,7 @@
 --- Turret Control
 -- Helps manage OpenModularTurrets turret blocks that have serial IO
 -- @Author: Brodur
--- @Version: 2.3
+-- @Version: 2.4
 -- @Requires:
 -- https://pastebin.com/WvF00A71 : JSON Utility functions
 -- https://pastebin.com/pLpe4zPb : Menu functions
@@ -27,6 +27,13 @@ local mmopts = {
   "Exit"
 }
 
+local privs = {
+  [1] = true, 
+  [2] = false, 
+  admin = true, 
+  trusted = false 
+}
+
 local db = {}
 local toRemove = {}
 local jsondir = "/home/settings.json"
@@ -47,8 +54,8 @@ function m.summary()
   print("Trusted players")
   print(lb)
 
-  for k,v in pairs(db.users) do
-    print(" - " .. k, v and "[Admin]" or "[Trusted]")
+  for user,priv in pairs(db.users) do
+    print(" - " .. user, priv and "[Admin]" or "[Trusted]")
   end
   print("\nAttacks")
   print(lb)
@@ -88,13 +95,12 @@ end
 --- Add Trusted Player
 -- Adds a trusted player to all turrets, either with or without admin privileges.
 -- @param player	The player to add.
--- @param usrType	1 for trusted, 2 for admin.
+-- @param usrType	True for Admin, False for Trusted.
 function m.addTrustedPlayer(player, usrType)
-  local args = {false, true}
-  for k,_ in pairs(db.users) do
-    if player == k then error("Cannot add a user that already exists!") end
+  for user,_ in pairs(db.users) do
+    if player == user then error("Cannot add a user that already exists!") end
   end
-  db.users[player] = args[usrType] 
+  db.users[player] = privs[usrType]
   db.hasChanges = true
 end
 
@@ -110,7 +116,7 @@ end
 --- Users
 -- Launches the add or remove user dialog
 function m.users()
-  local options = {"Add a trusted user", "Remove a trused user","Exit"}
+  local options = {"Add a trusted user", "Remove a trusted user","Exit"}
   local opt = -1
   while opt ~= #options do
     opt = menu.list(options, mmopts[3])
@@ -118,10 +124,10 @@ function m.users()
       local userTypes = {"Trusted", "Admin"}
       term.write("Add a trusted player: ")
       local player  = trim(term.read())
-      local usrType = menu.dialog("User or Admin?", "User", "Admin")
+      local usrType = menu.dialog("Trusted or Admin?", "Trusted", "Admin")
       local opt = menu.dialog("Add \'" .. player .. "\' as " .. userTypes[usrType] .." type user?", "Confirm", "Cancel")
       if opt == 1 then
-        m.addTrustedPlayer(player, usrType)
+        m.addTrustedPlayer(player, privs[usrType])
       end
     end
     if opt == 2 then
@@ -146,16 +152,18 @@ end
 --- Distribute Json
 -- Disseminates the settings from the database to all turrets.
 function m.distribJson()
-  for _,v in pairs(db.turrets) do
-    for _,player in pairs(toRemove) do
-      component.invoke(v, "removeTrustedPlayer", player)
+  for _,uuid in ipairs(db.turrets) do
+
+    for _,player in ipairs(toRemove) do 
+      component.invoke(uuid, "removeTrustedPlayer", player)
     end
 
   	for user,priv in pairs(db.users) do
-      component.invoke(v, "addTrustedPlayer", user, priv)
-  	end
-    for meth,bool in pairs(db.targets) do
-      component.invoke(v, meth, bool)
+      component.invoke(uuid, "addTrustedPlayer", user, priv)
+    end
+    
+    for meth,isTarget in pairs(db.targets) do
+      component.invoke(uuid, meth, isTarget)
     end
   end
   toRemove= {}
