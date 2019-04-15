@@ -169,13 +169,22 @@ function m.distribJson()
   toRemove= {}
 end
 
+--- Get Turrets
+-- Get the connected turret components.
+function updateTurrets()
+  for turret in pairs(component.list(tb)) do 
+    if db.turrets[turret] == nil then
+      db.turrets[#db.turrets+1] = turret
+      db.hasChanges = true;
+    end 
+  end
+end
+
 --- Sub menu
 -- Determines which menu function to call.
 -- @param index The selected index in the main menu options table.
 function m.subMenu(index)
-  local turrets = {}
-  for k in pairs(component.list(tb)) do turrets[#turrets+1] = k end 
-  db.turrets = turrets
+  updateTurrets()
 
   if index == mmopts[1] then m.summary() end
   if index == mmopts[2] then m.target() end
@@ -200,7 +209,8 @@ function m.onLoad()
   end
 					
   db = jsonutil.load(jsondir)
-  for k in pairs(component.list(tb)) do db.turrets[#db.turrets+1] = k end
+  updateTurrets()
+  event.listen("component_added", onComponentAdded)
   m.main()
 end
 
@@ -229,12 +239,11 @@ end
 -- @param address	The hardware address of the new component.
 -- @param componentType 	The type of the new component.
 -- @todo figure out why the event listener is not firing all of the time, until that is figured disregard this function
--- function onComponentAdded(eventType, address, componentType)
---   if componentType == "turret_base" then
---     distribJson()
---   end
--- end
+function onComponentAdded(eventType, address, componentType)
+  if componentType == "turret_base" then
+    distribJson()
+  end
+end
 
--- event.listen("component_added", onComponentAdded)
 m.onLoad()
 return m
