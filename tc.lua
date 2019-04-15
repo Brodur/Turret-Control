@@ -95,12 +95,10 @@ end
 --- Add Trusted Player
 -- Adds a trusted player to all turrets, either with or without admin privileges.
 -- @param player	The player to add.
--- @param usrType	True for Admin, False for Trusted.
-function m.addTrustedPlayer(player, usrType)
-  for user,_ in pairs(db.users) do
-    if player == user then error("Cannot add a user that already exists!") end
-  end
-  db.users[player] = privs[usrType]
+-- @param priv	 	True for Admin, False for Trusted.
+function m.addTrustedPlayer(player, priv)
+  if db.users[player] ~= nil then error("Cannot add a user that already exists!") end
+  db.users[player] = priv
   db.hasChanges = true
 end
 
