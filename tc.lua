@@ -239,6 +239,7 @@ end
 -- @todo figure out why the event listener is not firing all of the time, until that is figured disregard this function
 function onComponentAdded(eventType, address, componentType)
   if componentType == "turret_base" then
+    updateTurrets()
     distribJson()
   end
 end
