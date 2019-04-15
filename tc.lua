@@ -97,9 +97,7 @@ end
 -- @param player	The player to add.
 -- @param usrType	True for Admin, False for Trusted.
 function m.addTrustedPlayer(player, priv)
-  for user,_ in pairs(db.users) do
-    if player == user then error("Cannot add a user that already exists!") end
-  end
+  if db.users[player] ~= nil then error("Cannot add a user that already exists!") end
   db.users[player] = priv
   db.hasChanges = true
 end
