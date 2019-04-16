@@ -170,8 +170,8 @@ end
 --- Get Turrets
 -- Get the connected turret components.
 function updateTurrets()
-  local isPresent = false
   for turret in pairs(component.list(tb)) do 
+    local isPresent = false
     for _,currentTurret in pairs(db.turrets) do
       if not isPresent and turret == currentTurret then isPresent=true end
     end
