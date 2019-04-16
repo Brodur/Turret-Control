@@ -25,8 +25,8 @@ local mmopts = {
 }
 
 local privs = {
-  [1] = true, 
-  [2] = false, 
+  [1] = false, 
+  [2] = true, 
   admin = true, 
   trusted = false 
 }
