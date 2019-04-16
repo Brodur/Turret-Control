@@ -1,7 +1,7 @@
 --- Turret Control
 -- Helps manage OpenModularTurrets turret blocks that have serial IO
 -- @Author: Brodur
--- @Version: 2.4
+-- @Version: 2.7
 -- @Requires:
 -- https://pastebin.com/WvF00A71 : JSON Utility functions
 -- https://pastebin.com/pLpe4zPb : Menu functions
@@ -150,6 +150,7 @@ end
 --- Distribute Json
 -- Disseminates the settings from the database to all turrets.
 function m.distribJson()
+  updateTurrets()
   for _,uuid in ipairs(db.turrets) do
 
     for _,player in ipairs(toRemove) do 
@@ -170,15 +171,10 @@ end
 --- Get Turrets
 -- Get the connected turret components.
 function updateTurrets()
+  db.turrets= {}
   for turret in pairs(component.list(tb)) do 
-    local isPresent = false
-    for _,currentTurret in pairs(db.turrets) do
-      if not isPresent and turret == currentTurret then isPresent=true end
-    end
-    if not isPresent then
-      db.turrets[#db.turrets+1] = turret
-      db.hasChanges = true;
-    end 
+    db.turrets[#db.turrets+1] = turret
+    db.hasChanges = true;
   end
 end
 
@@ -186,8 +182,6 @@ end
 -- Determines which menu function to call.
 -- @param index The selected index in the main menu options table.
 function m.subMenu(index)
-  updateTurrets()
-
   if index == mmopts[1] then m.summary() end
   if index == mmopts[2] then m.target() end
   if index == mmopts[3] then m.users() end
@@ -246,7 +240,6 @@ end
 -- @todo figure out why the event listener is not firing all of the time, until that is figured disregard this function
 function onComponentAdded(_, address, componentType)
   if componentType == "turret_base" then
-    updateTurrets()
     distribJson()
   end
 end
