@@ -1,19 +1,16 @@
 --- Turret Control
 -- Helps manage OpenModularTurrets turret blocks that have serial IO
 -- @Author: Brodur
--- @Version: 2.7
+-- @Version: 3.0
 -- @Requires:
--- https://pastebin.com/WvF00A71 : JSON Utility functions
 -- https://pastebin.com/pLpe4zPb : Menu functions
--- https://pastebin.com/SKwM2UZH : Lua JSON Library
 
 local term = require("term")
 local component = require("component")
 local event = require("event")
-local json = require("json")
 local menu = require("menu")
-local jsonutil = require("jsonutil")
 local fs = require("filesystem")
+local sz = require("serialization")
 
 local m = {}
 local tb = "turret_base"
@@ -36,7 +33,29 @@ local privs = {
 
 local db = {}
 local toRemove = {}
-local jsondir = "/home/settings.json"
+local dbdir = "/home/settings.lua"
+
+--- Save
+-- Save the contents of given table to a file.
+-- @param tbl  The table to save.
+-- @param dir  Where to save the table.
+function save(tbl, dir)
+  file = io.open(dir, "w")
+  file:write(sz.serialize(tbl))
+  file:close()
+end
+
+--- Load 
+-- Loads the serialized database from file.
+-- @param dir  The directory where the database is located.
+-- @return The parsed serial table.
+function load(dir)
+  str = ""
+  for line in io.lines(dir) do str = str .. line end
+  return sz.unserialize(str)
+end
+
+
 
 --- Trims strings
 -- Gets rid of trailing white space or special characters.
@@ -191,7 +210,7 @@ end
 --- On Load
 -- Initializes the database and grabs the initial turrets.
 function m.onLoad()
-  if not fs.exists(jsondir) then 
+  if not fs.exists(dbdir) then 
     db = {
 		hasChanges=false,
 		targets={setAttacksMobs=false,
@@ -201,10 +220,10 @@ function m.onLoad()
 		turrets = {},
 		users = {}
 	}
-	jsonutil.save(db, jsondir)
+	save(db, dbdir)
   end
 					
-  db = jsonutil.load(jsondir)
+  db = load(dbdir)
   updateTurrets()
 
   event.listen("component_added", onComponentAdded)     --Wire up turret added.
@@ -221,7 +240,7 @@ function m.main()
 
   while mmopt ~= #mmopts do
     if db.hasChanges then
-      jsonutil.save(db, jsondir)
+      save(db, dbdir)
       db.hasChanges = false
       m.distribJson()
     end
