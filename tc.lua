@@ -212,7 +212,10 @@ function m.onLoad()
 					
   db = jsonutil.load(jsondir)
   updateTurrets()
-  event.listen("component_added", onComponentAdded)
+
+  event.listen("component_added", onComponentAdded)     --Wire up turret added.
+  event.listen("component_removed", onComponentRemoved) --Wire up turret removed.
+
   m.main()
 end
 
@@ -237,16 +240,26 @@ end
 
 --- On Component Added
 -- Push the stored config when a new turret is detected.
--- @param eventType	The type of event, passed by event listener.
+-- @param _	The type of event, passed by event listener.
 -- @param address	The hardware address of the new component.
 -- @param componentType 	The type of the new component.
 -- @todo figure out why the event listener is not firing all of the time, until that is figured disregard this function
-function onComponentAdded(eventType, address, componentType)
+function onComponentAdded(_, address, componentType)
   if componentType == "turret_base" then
     updateTurrets()
     distribJson()
   end
 end
 
+--- On Component Removed
+-- Remove turrets from the database is they are removed physically.
+-- @param _	The type of event, passed by event listener.
+-- @param address	The hardware address of the  component.
+-- @param componentType 	The type of the  component.
+function onComponentRemoved(_, address, componentType)
+  if componentType == "turret_base" then
+    db.turrets[address] = nil
+  end
+end
 m.onLoad()
 return m
