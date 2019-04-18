@@ -168,7 +168,7 @@ end
 
 --- Distribute Json
 -- Disseminates the settings from the database to all turrets.
-function m.distribJson()
+function m.distribConfig()
   updateTurrets()
   for _,uuid in ipairs(db.turrets) do
 
@@ -204,7 +204,7 @@ function m.subMenu(index)
   if index == mmopts[1] then m.summary() end
   if index == mmopts[2] then m.target() end
   if index == mmopts[3] then m.users() end
-  if index == mmopts[4] then m.distribJson() end
+  if index == mmopts[4] then m.distribConfig() end
 end     
 
 --- On Load
@@ -242,7 +242,7 @@ function m.main()
     if db.hasChanges then
       save(db, dbdir)
       db.hasChanges = false
-      m.distribJson()
+      m.distribConfig()
     end
     if mmopt ~= #mmopts then
       mmopt = menu.list(mmopts, mmoptTitle)
@@ -259,7 +259,7 @@ end
 -- @todo figure out why the event listener is not firing all of the time, until that is figured disregard this function
 function onComponentAdded(_, address, componentType)
   if componentType == "turret_base" then
-    distribJson()
+    m.distribConfig()
   end
 end
 
