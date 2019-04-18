@@ -166,7 +166,7 @@ function m.users()
   end
 end
 
---- Distribute Json
+--- Distribute Config
 -- Disseminates the settings from the database to all turrets.
 function m.distribConfig()
   updateTurrets()
