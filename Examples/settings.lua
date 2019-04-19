@@ -1,0 +1,1 @@
+{hasChanges=true,turrets={"76c8efac-2ea9-4ea6-b89f-1f11d1d50963","26acd396-fb67-4123-84f9-dba665c13e46"},users={Emfitty=false,Kyle8910=false,crassclown=true,Ouhai_Ruby=false,fatso12321=false},targets={setAttacksMobs=true,setAttacksNeutrals=false,setAttacksPlayers=true}}

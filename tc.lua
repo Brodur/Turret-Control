@@ -1,16 +1,16 @@
 --- Turret Control
 -- Helps manage OpenModularTurrets turret blocks that have serial IO
 -- @Author: Brodur
--- @Version: 3.0
+-- @Version: 3.1
 -- @Requires:
--- https://pastebin.com/pLpe4zPb : Menu functions
+-- serialutils.lua, menu.lua
 
 local term = require("term")
 local component = require("component")
 local event = require("event")
 local menu = require("menu")
 local fs = require("filesystem")
-local sz = require("serialization")
+local sz = require("serialutils")
 
 local m = {}
 local tb = "turret_base"
@@ -34,28 +34,6 @@ local privs = {
 local db = {}
 local toRemove = {}
 local dbdir = "/home/settings.lua"
-
---- Save
--- Save the contents of given table to a file.
--- @param tbl  The table to save.
--- @param dir  Where to save the table.
-function save(tbl, dir)
-  file = io.open(dir, "w")
-  file:write(sz.serialize(tbl))
-  file:close()
-end
-
---- Load 
--- Loads the serialized database from file.
--- @param dir  The directory where the database is located.
--- @return The parsed serial table.
-function load(dir)
-  str = ""
-  for line in io.lines(dir) do str = str .. line end
-  return sz.unserialize(str)
-end
-
-
 
 --- Trims strings
 -- Gets rid of trailing white space or special characters.
@@ -220,10 +198,10 @@ function m.onLoad()
 		turrets = {},
 		users = {}
 	}
-	save(db, dbdir)
+	sz.save(db, dbdir)
   end
 					
-  db = load(dbdir)
+  db = sz.load(dbdir)
   updateTurrets()
 
   event.listen("component_added", onComponentAdded)     --Wire up turret added.
@@ -240,7 +218,7 @@ function m.main()
 
   while mmopt ~= #mmopts do
     if db.hasChanges then
-      save(db, dbdir)
+      sz.save(db, dbdir)
       db.hasChanges = false
       m.distribConfig()
     end
