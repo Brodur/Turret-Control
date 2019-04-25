@@ -1,6 +1,7 @@
 # Turret-Control
 Repo for OpenComputers/OpenModularTurrets turret control program.
-Requires:
+
+###Requires:
 
 [CLI-Menu-lib (menu.lua)](https://github.com/Brodur/CLI-Menu-Lib)
 
