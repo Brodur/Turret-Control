@@ -126,8 +126,8 @@ function m.users()
       term.write("Add a trusted player: ")
       local player  = trim(term.read())
       local usrType = menu.dialog("Trusted or Admin?", "Trusted", "Admin")
-      local opt = menu.dialog("Add \'" .. player .. "\' as " .. userTypes[usrType] .." type user?", "Confirm", "Cancel")
-      if opt == 1 then
+      local confirm = menu.dialog("Add \'" .. player .. "\' as " .. userTypes[usrType] .." type user?", "Confirm", "Cancel")
+      if confirm == 1 then
         m.addTrustedPlayer(player, privs[usrType])
       end
     end
