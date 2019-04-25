@@ -45,12 +45,12 @@ end
 --- To String
 -- Convert the saved config into a string
 -- @returns The pretty string of the config.
-function db.toString()
+function toString()
   local lb = "-------------------------------\n"
   str = "Trusted players:\n"
   str = str .. lb --Line break
   for user,priv in pairs(db.users) do
-    str = str .. " - " .. user, priv and "[Admin]\n" or "[Trusted]\n"
+    str = str .. " - " .. user .. "\t" .. tostring(priv and "[Admin]" or "[Trusted]") .. "\n"
   end
 
   str = str .. "\nAttacks:\n"
@@ -65,7 +65,7 @@ end
 function m.summary()
   term.setCursor(1,1)
   print(mmopts[1] .. "\n")
-  print(db.toString())
+  print(toString())
   print("\n\nPress enter to continue...")
   term.read()
 end
@@ -276,5 +276,6 @@ function onComponentRemoved(_, address, componentType)
     db.turrets[address] = nil
   end
 end
+
 m.onLoad()
 return m
