@@ -83,7 +83,7 @@ end
 
 ---Target
 -- Selects the targeting parameter
-function m.target()
+function m.targetMenu()
   local options = {"Attack Mobs", "Attack Neutrals", "Attack Players", "Exit"}
   local opt = -1
   while opt ~= #options do  
@@ -115,36 +115,48 @@ function m.removeTrustedPlayer(player)
 end
 
 --- Users
--- Launches the add or remove user dialog
-function m.users()
+-- Launches the add or remove user dialog.
+function m.usersMenu()
   local options = {"Add a trusted user", "Remove a trusted user","Exit"}
   local opt = -1
   while opt ~= #options do
     opt = menu.list(options, mmopts[3])
     if opt == 1 then 
-      local userTypes = {"Trusted", "Admin"}
-      term.write("Add a trusted player: ")
-      local player  = trim(term.read())
-      local usrType = menu.dialog("Trusted or Admin?", "Trusted", "Admin")
-      local confirm = menu.dialog("Add \'" .. player .. "\' as " .. userTypes[usrType] .." type user?", "Confirm", "Cancel")
-      if confirm == 1 then
-        m.addTrustedPlayer(player, privs[usrType])
-      end
+      usersMenuAdd()
     end
     if opt == 2 then
-      local users = {"Cancel"}
-      for k,v in pairs(db.users) do users[#users+1] = k end
-      local user = -1
-      while user ~= 1 do
-        user = menu.list(users, "Select a user")
-        if user ~= 1 then
-          local player = users[user]
-          local confirm = menu.dialog("Remove \'" .. player .. "\' from trusted users?", "Confirm", "Cancel")
-          if confirm == 1 then 
-            m.removeTrustedPlayer(player)
-            table.remove(users, user)
-          end
-        end
+      usersMenuRemove()
+    end
+  end
+end
+
+--- Users Menu Add
+-- Add user menu with confirm and privilege.
+function usersMenuAdd()
+  local userTypes = {"Trusted", "Admin"}
+  term.write("Add a trusted player: ")
+  local player  = trim(term.read())
+  local usrType = menu.dialog("Trusted or Admin?", "Trusted", "Admin")
+  local confirm = menu.dialog("Add \'" .. player .. "\' as " .. userTypes[usrType] .." type user?", "Confirm", "Cancel")
+  if confirm == 1 then
+    m.addTrustedPlayer(player, privs[usrType])
+  end
+end
+
+--- Users Menu Remove
+-- Remove users menu list.
+function usersMenuRemove()
+  local users = {"Cancel"}
+  for k,v in pairs(db.users) do users[#users+1] = k end
+  local user = -1
+  while user ~= 1 do
+    user = menu.list(users, "Select a user")
+    if user ~= 1 then
+      local player = users[user]
+      local confirm = menu.dialog("Remove \'" .. player .. "\' from trusted users?", "Confirm", "Cancel")
+      if confirm == 1 then 
+        m.removeTrustedPlayer(player)
+        table.remove(users, user)
       end
     end
   end
@@ -181,13 +193,19 @@ function updateTurrets()
   end
 end
 
+
+function save()
+  sz.save(db, dbdir)
+  db.hasChanges = false
+end
+
 --- Sub menu
 -- Determines which menu function to call.
 -- @param index The selected index in the main menu options table.
 function m.subMenu(index)
   if index == mmopts[1] then m.summary() end
-  if index == mmopts[2] then m.target() end
-  if index == mmopts[3] then m.users() end
+  if index == mmopts[2] then m.targetMenu() end
+  if index == mmopts[3] then m.usersMenu() end
   if index == mmopts[4] then m.distribConfig() end
 end     
 
@@ -196,15 +214,16 @@ end
 function m.onLoad()
   if not fs.exists(dbdir) then 
     db = {
-		hasChanges=false,
-		targets={setAttacksMobs=false,
-				 setAttacksNeutrals=false,
-				 setAttacksPlayers=false
-				},
-		turrets = {},
-		users = {}
-	}
-	sz.save(db, dbdir)
+      hasChanges=false,
+      targets = {
+        setAttacksMobs=false,
+        setAttacksNeutrals=false,
+        setAttacksPlayers=false
+      },
+      turrets = {},
+      users = {}
+	  }
+    save()
   end
 					
   db = sz.load(dbdir)
@@ -224,15 +243,15 @@ function m.main()
 
   while mmopt ~= #mmopts do
     if db.hasChanges then
-      sz.save(db, dbdir)
-      db.hasChanges = false
       m.distribConfig()
+      save()
     end
     if mmopt ~= #mmopts then
       mmopt = menu.list(mmopts, mmoptTitle)
       m.subMenu(mmopts[mmopt])
     end
   end
+  save() -- ensure save on exit
 end
 
 --- On Component Added
