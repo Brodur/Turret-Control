@@ -193,10 +193,17 @@ function updateTurrets()
   end
 end
 
-
+--- Save
+-- Saves the database table to file.
 function save()
   sz.save(db, dbdir)
   db.hasChanges = false
+end
+
+--- Load
+-- Loads the database table from file.
+function load()
+  db = sz.load(dbdir)
 end
 
 --- Sub menu
@@ -225,8 +232,8 @@ function m.onLoad()
 	  }
     save()
   end
-					
-  db = sz.load(dbdir)
+          
+  load()
   updateTurrets()
 
   event.listen("component_added", onComponentAdded)     --Wire up turret added.
