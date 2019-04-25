@@ -14,7 +14,6 @@ local sz = require("serialutils")
 
 local m = {}
 local tb = "turret_base"
-local lb = "-------------------------------"
 
 local mmopts = {
   "Summary",
@@ -43,23 +42,30 @@ function trim(s)
    return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
+--- To String
+-- Convert the saved config into a string
+-- @returns The pretty string of the config.
+function db.toString()
+  local lb = "-------------------------------\n"
+  str = "Trusted players:\n"
+  str = str .. lb --Line break
+  for user,priv in pairs(db.users) do
+    str = str .. " - " .. user, priv and "[Admin]\n" or "[Trusted]\n"
+  end
+
+  str = str .. "\nAttacks:\n"
+  str = str .. lb --Line break
+  str = str .. "Mobs:\t\t" .. tostring(db.targets.setAttacksMobs) .. "\n"
+  str = str .. "Neutrals:\t" .. tostring(db.targets.setAttacksNeutrals) .. "\n"
+  str = str .. "Players:\t" .. tostring(db.targets.setAttacksPlayers ) .. "\n"
+  return str
+end 
 --- Summary output
 -- Outputs the summary of a selected turret.
 function m.summary()
   term.setCursor(1,1)
   print(mmopts[1] .. "\n")
-  print("Trusted players")
-  print(lb)
-
-  for user,priv in pairs(db.users) do
-    print(" - " .. user, priv and "[Admin]" or "[Trusted]")
-  end
-  print("\nAttacks")
-  print(lb)
-  print("Mobs:\t\t" .. tostring(db.targets.setAttacksMobs))
-  print("Neutrals:\t" .. tostring(db.targets.setAttacksNeutrals))
-  print("Players:\t" .. tostring(db.targets.setAttacksPlayers))
-
+  print(db.toString())
   print("\n\nPress enter to continue...")
   term.read()
 end
